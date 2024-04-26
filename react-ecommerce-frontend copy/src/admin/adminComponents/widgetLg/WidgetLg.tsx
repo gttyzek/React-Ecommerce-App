@@ -1,0 +1,56 @@
+import { useEffect, useState } from "react";
+import "./widgetLg.css";
+import { userRequest } from "../../../axios";
+import { format } from "timeago.js";
+
+export default function WidgetLg() {
+  const [orders, setOrders ] = useState([]);
+
+  useEffect(()=> {
+    const getOrders =async () => {
+      try {
+        const res = await userRequest.get("/api/order/get-all-orders")
+        setOrders(res.data.orders)
+      } catch (error){
+          error
+      }
+    }
+    getOrders();
+  }, [])
+
+  const Button = ({ type }) => {
+    return <button className={"widgetLgButton " + type}>{type}</button>;
+  };
+  return (
+    <div className="widgetLg">
+      <h3 className="widgetLgTitle">Latest transactions</h3>
+      <table className="widgetLgTable">
+        <tr className="widgetLgTr">
+          <th className="widgetLgTh">Customer</th>
+          <th className="widgetLgTh">Date</th>
+          <th className="widgetLgTh">Amount</th>
+          <th className="widgetLgTh">Status</th>
+        </tr>
+        {orders.map((order) => (
+            <tr key={order._id} className="widgetLgTr">
+          <td className="widgetLgUser">
+              <img src={order.userInfo.image}
+               alt=""  
+               className="widgetLgImg"
+              />
+            <div className="widgetLgUserDetails">
+              <span className="widgetLgUsername">{order.userInfo.username}</span>
+              <span className="widgetLgName">{order.userInfo.firstName} {order.userInfo.lastName}</span>
+            </div>
+          </td>
+          <td className="widgetLgDate">{format(order.createdAt)}</td>
+          <td className="widgetLgAmount">${order.amount}</td>
+          <td className="widgetLgStatus">
+            <Button type={order.status} />
+          </td>
+        </tr>
+        ))}
+      </table>
+    </div>
+  );
+}
